@@ -32,10 +32,20 @@ jobs:
     runs-on: windows-2022
 
     steps:
+      - name: Prepare Directories
+        shell: cmd
+        run: |
+          mkdir %userprofile%\TBuild\Libraries
+          mkdir %userprofile%\TBuild\ThirdParty
+          mklink /d %GITHUB_WORKSPACE%\TBuild %userprofile%\TBuild
+          echo TBUILD=%GITHUB_WORKSPACE%\TBuild>>%GITHUB_ENV%
+          echo LibrariesPath=%GITHUB_WORKSPACE%\TBuild\Libraries\win64>>%GITHUB_ENV%
+
       - name: Checkout BoltuGram Source
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          path: ${{ env.TBUILD }}\BoltuGram
           fetch-depth: 0
 
       - name: Set up Python
@@ -49,77 +59,98 @@ jobs:
           arch: x64
           toolset: '14.44'
 
-      - name: Install Qt 6
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.7.2'
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_msvc2019_64'
-          modules: 'qt5compat qtimageformats qtshadertools'
-          cache: true
-
       - name: Install Build Tools (Ninja, NASM, InnoSetup)
+        shell: cmd
         run: |
           choco install ninja nasm innosetup 7zip.install -y --no-progress
           pip install meson ninja pywin32 six
 
       - name: Add Tools to PATH
+        shell: pwsh
         run: |
           echo "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Configure CMake
+      - name: Cache ThirdParty
+        id: cache-thirdparty
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TBUILD }}\ThirdParty
+          key: ${{ runner.os }}-x64-thirdparty-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
+          restore-keys: ${{ runner.os }}-x64-thirdparty-
+
+      - name: Cache Libraries
+        id: cache-libs
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.LibrariesPath }}\*
+            !${{ env.LibrariesPath }}\cache_keys
+            !${{ env.LibrariesPath }}\[qQ]t[_-]*
+            ${{ env.LibrariesPath }}\cache_keys\*
+            !${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
+          key: ${{ runner.os }}-x64-libs-v1-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
+          restore-keys: ${{ runner.os }}-x64-libs-v1-
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.LibrariesPath }}\[qQ]t[_-]*
+            ${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
+          key: ${{ runner.os }}-x64-qt6-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
+          restore-keys: ${{ runner.os }}-x64-qt6-
+
+      - name: Prepare Libraries
+        shell: cmd
         run: |
-          cmake -B out -S . `
-            -G "Ninja" `
-            -DCMAKE_BUILD_TYPE=${{ github.event.inputs.build_type || 'Release' }} `
-            -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" `
-            -DDESKTOP_APP_QT6=ON `
-            -DTDESKTOP_API_ID=38654520 `
-            -DTDESKTOP_API_HASH=f874a438458c029b2b1d2ce1b8d30597 `
-            -DDESKTOP_APP_DISABLE_CRASH_REPORTS=ON
+          cd %TBUILD%\BoltuGram\Telegram\build\prepare
+          call win.bat skip-release silent qt6
+
+      - name: Configure CMake
+        shell: cmd
+        run: |
+          cd %TBUILD%\BoltuGram\Telegram
+          call configure.bat x64 qt6 -D TDESKTOP_API_ID=38654520 -D TDESKTOP_API_HASH=f874a438458c029b2b1d2ce1b8d30597 -D CMAKE_CONFIGURATION_TYPES=${{ github.event.inputs.build_type || 'Release' }} -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
 
       - name: Build BoltuGram
+        shell: cmd
         run: |
-          cmake --build out --config ${{ github.event.inputs.build_type || 'Release' }} --target Telegram
+          cmake --build %TBUILD%\BoltuGram\out --config ${{ github.event.inputs.build_type || 'Release' }} --target Telegram --parallel
 
       - name: Package Windows Artifacts
         id: package
         shell: pwsh
         run: |
           $buildConfig = "${{ github.event.inputs.build_type || 'Release' }}"
-          $outDir = "out/bin/$buildConfig"
-          if (-not (Test-Path $outDir)) {
-            $outDir = "out/bin"
-          }
-          if (-not (Test-Path $outDir)) {
-            $outDir = "out"
-          }
-          
-          New-Item -ItemType Directory -Force -Path "dist/portable" | Out-Null
+          $baseDir = "${{ env.TBUILD }}/BoltuGram"
+          $distDir = "$baseDir/dist"
+          $portableDir = "$distDir/portable"
+          New-Item -ItemType Directory -Force -Path $portableDir | Out-Null
           
           # Copy binary
-          $exePath = Get-ChildItem -Path "out" -Filter "Telegram.exe" -Recurse | Select-Object -First 1
+          $exePath = Get-ChildItem -Path "$baseDir/out" -Filter "Telegram.exe" -Recurse | Select-Object -First 1
           if ($exePath) {
-            Copy-Item $exePath.FullName -Destination "dist/portable/BoltuGram.exe"
+            Copy-Item $exePath.FullName -Destination "$portableDir/BoltuGram.exe"
           } else {
             Write-Warning "Telegram.exe not found directly in out, checking build output"
           }
           
-          # Deploy Qt runtime dependencies if windeployqt exists
-          if ($env:QT_ROOT_DIR -and (Test-Path "$env:QT_ROOT_DIR\bin\windeployqt.exe")) {
-            & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --release --no-translations --compiler-runtime "dist/portable/BoltuGram.exe"
+          $updaterPath = Get-ChildItem -Path "$baseDir/out" -Filter "Updater.exe" -Recurse | Select-Object -First 1
+          if ($updaterPath) {
+            Copy-Item $updaterPath.FullName -Destination "$portableDir/Updater.exe"
           }
           
           # Create Portable ZIP
-          Compress-Archive -Path "dist/portable/*" -DestinationPath "dist/BoltuGram-Windows-x64-Portable.zip" -Force
+          Compress-Archive -Path "$portableDir/*" -DestinationPath "$distDir/BoltuGram-Windows-x64-Portable.zip" -Force
           
           # Build Inno Setup Installer if compiler exists
           if (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
-            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /dMyAppVersion=5.12.0 /dMyAppVersionFull=5.12.0 /dReleasePath="dist/portable" "Telegram/build/setup.iss"
-            if (Test-Path "Telegram/build/boltusetup-x64.5.12.0.exe") {
-              Move-Item "Telegram/build/boltusetup-x64.5.12.0.exe" "dist/BoltuGram-Windows-x64-Setup.exe" -Force
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /dMyAppVersion=7.0.9 /dMyAppVersionFull=7.0.9 /dMyBuildTarget="win64" /dReleasePath="$portableDir" "$baseDir/Telegram/build/setup.iss"
+            $setupExe = Get-ChildItem -Path $portableDir -Filter "boltusetup-x64*.exe" -Recurse | Select-Object -First 1
+            if ($setupExe) {
+              Move-Item $setupExe.FullName -Destination "$distDir/BoltuGram-Windows-x64-Setup.exe" -Force
             }
           }
 
@@ -128,19 +159,19 @@ jobs:
         with:
           name: BoltuGram-Windows-x64
           path: |
-            dist/*.zip
-            dist/*.exe
-            out/**/Telegram.exe
-            out/**/BoltuGram.exe
+            ${{ env.TBUILD }}/BoltuGram/dist/*.zip
+            ${{ env.TBUILD }}/BoltuGram/dist/*.exe
+            ${{ env.TBUILD }}/BoltuGram/out/**/Telegram.exe
+            ${{ env.TBUILD }}/BoltuGram/out/**/BoltuGram.exe
           if-no-files-found: warn
 
       - name: Create GitHub Release (On Tag Push or Main Dispatch)
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/BoltuGram-Windows-x64-Portable.zip
-            dist/BoltuGram-Windows-x64-Setup.exe
+            ${{ env.TBUILD }}/BoltuGram/dist/BoltuGram-Windows-x64-Portable.zip
+            ${{ env.TBUILD }}/BoltuGram/dist/BoltuGram-Windows-x64-Setup.exe
           name: BoltuGram Release ${{ github.ref_name }}
           draft: false
           prerelease: false
