@@ -56,7 +56,7 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2019_64'
-          modules: 'qtimageformats qtsvg qt5compat qtshadertools'
+          modules: 'qt5compat qtimageformats qtshadertools'
           cache: true
 
       - name: Install Build Tools (Ninja, NASM, InnoSetup)
