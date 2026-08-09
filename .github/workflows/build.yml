@@ -49,6 +49,16 @@ jobs:
           arch: x64
           toolset: '14.44'
 
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          modules: 'qtimageformats qtsvg qt5compat qtshadertools'
+          cache: true
+
       - name: Install Build Tools (Ninja, NASM, InnoSetup)
         run: |
           choco install ninja nasm innosetup 7zip.install -y --no-progress
@@ -64,6 +74,8 @@ jobs:
           cmake -B out -S . `
             -G "Ninja" `
             -DCMAKE_BUILD_TYPE=${{ github.event.inputs.build_type || 'Release' }} `
+            -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" `
+            -DDESKTOP_APP_QT6=ON `
             -DTDESKTOP_API_ID=38654520 `
             -DTDESKTOP_API_HASH=f874a438458c029b2b1d2ce1b8d30597 `
             -DDESKTOP_APP_DISABLE_CRASH_REPORTS=ON
@@ -93,6 +105,11 @@ jobs:
             Copy-Item $exePath.FullName -Destination "dist/portable/BoltuGram.exe"
           } else {
             Write-Warning "Telegram.exe not found directly in out, checking build output"
+          }
+          
+          # Deploy Qt runtime dependencies if windeployqt exists
+          if ($env:QT_ROOT_DIR -and (Test-Path "$env:QT_ROOT_DIR\bin\windeployqt.exe")) {
+            & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --release --no-translations --compiler-runtime "dist/portable/BoltuGram.exe"
           }
           
           # Create Portable ZIP
