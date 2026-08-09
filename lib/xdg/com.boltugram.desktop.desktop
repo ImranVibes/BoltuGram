@@ -1,0 +1,22 @@
+[Desktop Entry]
+Name=BoltuGram Desktop
+Comment=Desktop version of BoltuGram
+TryExec=BoltuGram
+Exec=env DESKTOPINTEGRATION=1 BoltuGram -- %U
+Icon=com.boltugram.desktop
+Terminal=false
+StartupWMClass=BoltuGram
+Type=Application
+Categories=Chat;Network;InstantMessaging;Qt;
+MimeType=x-scheme-handler/tg;x-scheme-handler/tonsite;
+Keywords=tg;chat;im;messaging;messenger;sms;telegram;tdesktop;boltugram;
+Actions=quit;
+DBusActivatable=true
+SingleMainWindow=true
+X-GNOME-UsesNotifications=true
+X-GNOME-SingleWindow=true
+
+[Desktop Action quit]
+Exec=BoltuGram -quit
+Name=Quit BoltuGram
+Icon=application-exit

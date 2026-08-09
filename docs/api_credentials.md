@@ -1,7 +1,7 @@
 ## API credentials
 
-Official Telegram keys:
+BoltuGram API keys:
 
-API_ID `2040`
+API_ID `38654520`
 
-API_HASH `b18441a1ff607e10a989891a5462e627`
+API_HASH `f874a438458c029b2b1d2ce1b8d30597`

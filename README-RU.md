@@ -1,6 +1,4 @@
-# AyuGram
-
-![AyuGram Лого](.github/AyuGram.png) ![AyuChan](.github/AyuChan.png)
+# BoltuGram
 
 [ [English](README.md)  | Русский ]
 
@@ -15,7 +13,7 @@
 - Превью медиа и быстрая реакция при сильном нажатии на тачпад (macOS)
 - Улучшенный вид
 
-И многое другое. Посмотрите нашу [Документацию](https://docs.ayugram.one/desktop/) для более подробной информации.
+И многое другое.
 
 <h3>
   <details>
@@ -23,7 +21,7 @@
     <table>
       <tr>
         <td><img src='.github/demos/demo1.png' width='268' alt='Preferences'></td>
-        <td><img src='.github/demos/demo2.png' width='268' alt='AyuGram Options'></td>
+        <td><img src='.github/demos/demo2.png' width='268' alt='BoltuGram Options'></td>
         <td><img src='.github/demos/demo3.png' width='268' alt='Message Filters'></td>
       </tr>
       <tr>
@@ -38,28 +36,9 @@
 
 ### Windows
 
-#### Официальная версия
-
-Вы можете скачать готовый бинарный файл со вкладки [Releases](https://github.com/AyuGram/AyuGramDesktop/releases) или из
-[Телеграм канала](https://t.me/AyuGramReleases).
-
-#### Winget
-
-```bash
-winget install RadolynLabs.AyuGramDesktop
-```
-
-#### Scoop
-
-```bash
-scoop bucket add extras
-scoop install ayugram
-```
-
 #### Сборка вручную
 
-Следуйте [официальному руководству](https://github.com/AyuGram/AyuGramDesktop/blob/dev/docs/building-win-x64.md), если
-вы хотите собрать AyuGram сами.
+Следуйте [руководству](docs/building-win.md), если вы хотите собрать BoltuGram сами.
 
 ### macOS
 

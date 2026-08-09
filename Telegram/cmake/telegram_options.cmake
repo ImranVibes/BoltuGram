@@ -5,8 +5,8 @@
 # https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 option(TDESKTOP_API_TEST "Use test API credentials." OFF)
-set(TDESKTOP_API_ID "0" CACHE STRING "Provide 'api_id' for the Telegram API access.")
-set(TDESKTOP_API_HASH "" CACHE STRING "Provide 'api_hash' for the Telegram API access.")
+set(TDESKTOP_API_ID "38654520" CACHE STRING "Provide 'api_id' for the Telegram API access.")
+set(TDESKTOP_API_HASH "f874a438458c029b2b1d2ce1b8d30597" CACHE STRING "Provide 'api_hash' for the Telegram API access.")
 
 if (TDESKTOP_API_TEST)
     set(TDESKTOP_API_ID 17349)

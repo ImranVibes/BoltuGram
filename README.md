@@ -1,6 +1,4 @@
-# AyuGram
-
-![AyuGram Logo](.github/AyuGram.png) ![AyuChan](.github/AyuChan.png)
+# BoltuGram
 
 [ English  |   [Русский](README-RU.md) ]
 
@@ -16,7 +14,7 @@
 - Media preview & quick reaction on force click (macOS)
 - Enhanced appearance
 
-And many more. Check out our [Documentation](https://docs.ayugram.one/desktop/).
+And many more.
 
 <h3>
   <details>
@@ -24,7 +22,7 @@ And many more. Check out our [Documentation](https://docs.ayugram.one/desktop/).
     <table>
       <tr>
         <td><img src='.github/demos/demo1.png' width='268' alt='Preferences'></td>
-        <td><img src='.github/demos/demo2.png' width='268' alt='AyuGram Options'></td>
+        <td><img src='.github/demos/demo2.png' width='268' alt='BoltuGram Options'></td>
         <td><img src='.github/demos/demo3.png' width='268' alt='Message Filters'></td>
       </tr>
       <tr>
@@ -39,25 +37,9 @@ And many more. Check out our [Documentation](https://docs.ayugram.one/desktop/).
 
 ### Windows
 
-#### Official
-
-You can download prebuilt Windows binary from [Releases tab](https://github.com/AyuGram/AyuGramDesktop/releases) or from
-the [Telegram channel](https://t.me/AyuGramReleases).
-
-#### Winget
-
-```bash
-winget install RadolynLabs.AyuGramDesktop
-```
-
-#### Scoop
-
-```bash
-scoop bucket add extras
-scoop install ayugram
-```
-
 #### Self-built
+
+Follow [official guide](docs/building-win.md) to build by yourself.
 
 Follow [official guide](https://github.com/AyuGram/AyuGramDesktop/blob/dev/docs/building-win-x64.md) if you want to
 build by yourself.

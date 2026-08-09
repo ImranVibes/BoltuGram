@@ -28,7 +28,7 @@ Choose an empty folder for the future build, for example **D:\\TBuild**. It will
 ## Initialize terminal
 
 Before preparing libraries and running build commands, initialize the Visual Studio environment for your target architecture.
-The default modern toolset from Visual Studio 2026 (`v145`) does not support Windows 7, so for AyuGram Desktop you must use `-vcvars_ver=14.44` (`v144.4`, based on `v143` with Windows 7 support).
+The default modern toolset from Visual Studio 2026 (`v145`) does not support Windows 7, so for BoltuGram Desktop you must use `-vcvars_ver=14.44` (`v144.4`, based on `v143` with Windows 7 support).
 
 For Visual Studio installation:
 
@@ -51,11 +51,11 @@ In the initialized terminal, go to ***BuildPath*** and run
 
 Go to ***BuildPath*\\tdesktop\\Telegram** and run
 
-    configure.bat x64 -D TDESKTOP_API_ID=2040 -D TDESKTOP_API_HASH=b18441a1ff607e10a989891a5462e627
+    configure.bat x64 -D TDESKTOP_API_ID=38654520 -D TDESKTOP_API_HASH=f874a438458c029b2b1d2ce1b8d30597
 
 * Open ***BuildPath*\\tdesktop\\out\\Telegram.slnx** in Visual Studio 2026
 * Select Telegram project and press Build > Build Telegram (Debug and Release configurations)
-* The result AyuGram.exe will be located in **D:\TBuild\tdesktop\out\Debug** (and **Release**)
+* The result BoltuGram.exe will be located in **D:\TBuild\tdesktop\out\Debug** (and **Release**)
 
 ## Troubleshooting
 

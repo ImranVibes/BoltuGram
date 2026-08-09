@@ -1,0 +1,130 @@
+name: Build BoltuGram Desktop
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - dev
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Configuration (Release or Debug)'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows x64 (.exe & portable)
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout BoltuGram Source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: '14.44'
+
+      - name: Install Build Tools (Ninja, NASM, InnoSetup)
+        run: |
+          choco install ninja nasm innosetup 7zip.install -y --no-progress
+          pip install meson ninja pywin32 six
+
+      - name: Add Tools to PATH
+        run: |
+          echo "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Configure CMake
+        run: |
+          cmake -B out -S . `
+            -G "Ninja" `
+            -DCMAKE_BUILD_TYPE=${{ github.event.inputs.build_type || 'Release' }} `
+            -DTDESKTOP_API_ID=38654520 `
+            -DTDESKTOP_API_HASH=f874a438458c029b2b1d2ce1b8d30597 `
+            -DDESKTOP_APP_DISABLE_CRASH_REPORTS=ON
+
+      - name: Build BoltuGram
+        run: |
+          cmake --build out --config ${{ github.event.inputs.build_type || 'Release' }} --target Telegram
+
+      - name: Package Windows Artifacts
+        id: package
+        shell: pwsh
+        run: |
+          $buildConfig = "${{ github.event.inputs.build_type || 'Release' }}"
+          $outDir = "out/bin/$buildConfig"
+          if (-not (Test-Path $outDir)) {
+            $outDir = "out/bin"
+          }
+          if (-not (Test-Path $outDir)) {
+            $outDir = "out"
+          }
+          
+          New-Item -ItemType Directory -Force -Path "dist/portable" | Out-Null
+          
+          # Copy binary
+          $exePath = Get-ChildItem -Path "out" -Filter "Telegram.exe" -Recurse | Select-Object -First 1
+          if ($exePath) {
+            Copy-Item $exePath.FullName -Destination "dist/portable/BoltuGram.exe"
+          } else {
+            Write-Warning "Telegram.exe not found directly in out, checking build output"
+          }
+          
+          # Create Portable ZIP
+          Compress-Archive -Path "dist/portable/*" -DestinationPath "dist/BoltuGram-Windows-x64-Portable.zip" -Force
+          
+          # Build Inno Setup Installer if compiler exists
+          if (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /dMyAppVersion=5.12.0 /dMyAppVersionFull=5.12.0 /dReleasePath="dist/portable" "Telegram/build/setup.iss"
+            if (Test-Path "Telegram/build/boltusetup-x64.5.12.0.exe") {
+              Move-Item "Telegram/build/boltusetup-x64.5.12.0.exe" "dist/BoltuGram-Windows-x64-Setup.exe" -Force
+            }
+          }
+
+      - name: Upload Artifacts to GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: BoltuGram-Windows-x64
+          path: |
+            dist/*.zip
+            dist/*.exe
+            out/**/Telegram.exe
+            out/**/BoltuGram.exe
+          if-no-files-found: warn
+
+      - name: Create GitHub Release (On Tag Push or Main Dispatch)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/BoltuGram-Windows-x64-Portable.zip
+            dist/BoltuGram-Windows-x64-Setup.exe
+          name: BoltuGram Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true

@@ -42,10 +42,12 @@
 #include "styles/style_layers.h"
 #include "styles/style_menu_icons.h"
 #include "ui/boxes/confirm_box.h"
-#include "ui/widgets/popup_menu.h"
-#include "ui/widgets/menu/menu_add_action_callback_factory.h"
 #include "window/window_peer_menu.h"
 #include "window/window_session_controller.h"
+#include "ayu/ui/boxes/edit_user_crm_box.h"
+#include "ayu/features/split_view/split_controller.h"
+#include "ayu/data/scratchpad_manager.h"
+#include "ui/toast/toast.h"
 
 namespace AyuUi {
 
@@ -268,7 +270,7 @@ void AddAyuGramActions(PeerData *peerData,
 	const auto topicId = topic ? topic->rootId().bare : 0;
 
 	addCallback(Window::PeerMenuCallback::Args{
-		.text = u"AyuGram"_q,
+		.text = u"BoltuGram"_q,
 		.handler = nullptr,
 		.icon = &st::menuIconGroupReactions,
 		.fillSubmenu = [=](not_null<Ui::PopupMenu*> menu) {
@@ -320,6 +322,19 @@ void AddAyuGramActions(PeerData *peerData,
 					.isAttention = true,
 				});
 			}
+			addAction({ .isSeparator = true });
+			addAction(
+				QString("Tag & Private Note"),
+				[=] {
+					sessionController->show(Box<AyuUi::EditUserCrmBox>(peerData));
+				},
+				&st::menuIconEdit);
+			addAction(
+				QString("Open in Split View"),
+				[=] {
+					AyuFeatures::SplitController::OpenInSplitView(sessionController, peerData);
+				},
+				&st::menuIconShowInChat);
 		},
 	});
 }
@@ -539,6 +554,16 @@ void AddHideMessageAction(not_null<Ui::PopupMenu*> menu, HistoryItem *item) {
 			history->requestChatListMessage();
 		},
 		&st::menuIconClear);
+
+	menu->addAction(
+		QString("Save to Scratchpad"),
+		[=] {
+			const auto text = item->originalText().text;
+			const auto author = item->from() ? item->from()->name() : QString("Message");
+			AyuData::ScratchpadManager::Instance().addBookmark(text, author);
+			Ui::Toast::Show(QString("Saved snippet to Scratchpad"));
+		},
+		&st::menuIconEdit);
 }
 
 void AddUserMessagesAction(not_null<Ui::PopupMenu*> menu, HistoryItem *item) {
