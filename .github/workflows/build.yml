@@ -76,8 +76,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.TBUILD }}\ThirdParty
-          key: ${{ runner.os }}-x64-thirdparty-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
-          restore-keys: ${{ runner.os }}-x64-thirdparty-
+          key: ${{ runner.os }}-x64-thirdparty-v2-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
+          restore-keys: ${{ runner.os }}-x64-thirdparty-v2-
 
       - name: Cache Libraries
         id: cache-libs
@@ -89,8 +89,8 @@ jobs:
             !${{ env.LibrariesPath }}\[qQ]t[_-]*
             ${{ env.LibrariesPath }}\cache_keys\*
             !${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
-          key: ${{ runner.os }}-x64-libs-v1-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
-          restore-keys: ${{ runner.os }}-x64-libs-v1-
+          key: ${{ runner.os }}-x64-libs-v2-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
+          restore-keys: ${{ runner.os }}-x64-libs-v2-
 
       - name: Cache Qt
         id: cache-qt
@@ -99,14 +99,16 @@ jobs:
           path: |
             ${{ env.LibrariesPath }}\[qQ]t[_-]*
             ${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
-          key: ${{ runner.os }}-x64-qt6-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
-          restore-keys: ${{ runner.os }}-x64-qt6-
+          key: ${{ runner.os }}-x64-qt6-v2-${{ hashFiles('**/Telegram/build/prepare/prepare.py') }}
+          restore-keys: ${{ runner.os }}-x64-qt6-v2-
 
       - name: Prepare Libraries
-        shell: cmd
+        shell: pwsh
         run: |
-          cd %TBUILD%\BoltuGram\Telegram\build\prepare
-          call win.bat skip-release silent qt6
+          $buildConfig = "${{ github.event.inputs.build_type || 'Release' }}"
+          $flag = if ($buildConfig -eq "Debug") { "skip-release" } else { "" }
+          cd "${{ env.TBUILD }}/BoltuGram/Telegram/build/prepare"
+          cmd /c "call win.bat $flag silent qt6"
 
       - name: Configure CMake
         shell: cmd
