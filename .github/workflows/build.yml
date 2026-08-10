@@ -32,6 +32,13 @@ jobs:
     runs-on: windows-2022
 
     steps:
+      - name: Configure Pagefile (Virtual Memory)
+        uses: al-cheb/configure-pagefile-action@v1.4
+        with:
+          minimum-size: 16GB
+          maximum-size: 32GB
+          disk-root: "C:"
+
       - name: Prepare Directories
         shell: cmd
         run: |
@@ -119,7 +126,7 @@ jobs:
       - name: Build BoltuGram
         shell: cmd
         run: |
-          cmake --build %TBUILD%\BoltuGram\out --config ${{ github.event.inputs.build_type || 'Release' }} --target Telegram --parallel
+          cmake --build %TBUILD%\BoltuGram\out --config ${{ github.event.inputs.build_type || 'Release' }} --target Telegram -- /p:PreferredToolArchitecture=x64 /p:TrackFileAccess=false /m:2
 
       - name: Package Windows Artifacts
         id: package
