@@ -47,6 +47,7 @@
 #include "ayu/ui/boxes/edit_user_crm_box.h"
 #include "ayu/features/split_view/split_controller.h"
 #include "ayu/data/scratchpad_manager.h"
+#include "ui/widgets/menu/menu_add_action_callback_factory.h"
 #include "ui/toast/toast.h"
 
 namespace AyuUi {

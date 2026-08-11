@@ -69,7 +69,7 @@ void BuildPanicSection(SectionBuilder &builder, AyuSectionBuilder &ayu) {
 const auto kMeta = BuildHelper({
 	.id = AyuPanic::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Panic Button & Stealth Lock")); },
+	.title = u"Panic Button & Stealth Lock"_q,
 	.icon = &st::menuIconLock,
 }, [](SectionBuilder &builder) {
 	auto ayu = AyuSectionBuilder(builder);

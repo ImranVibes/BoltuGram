@@ -54,7 +54,7 @@ void BuildVoiceStudioSection(SectionBuilder &builder, AyuSectionBuilder &ayu) {
 				static_cast<AyuFeatures::VoiceFilterType>(i));
 			Ui::Toast::Show(QString("Voice filter updated"));
 		},
-		.icon = { &st::menuIconMicrophone },
+		.icon = { &st::menuIconSoundSelect },
 	});
 
 	builder.addSkip();
@@ -84,7 +84,7 @@ void BuildVoiceStudioSection(SectionBuilder &builder, AyuSectionBuilder &ayu) {
 			const float speeds[] = { 0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f, 3.0f };
 			AyuFeatures::VoiceStudioManager::Instance().setPlaybackSpeed(speeds[i]);
 		},
-		.icon = { &st::menuIconPlay },
+		.icon = { &st::menuIconSend },
 	});
 
 	builder.addSkip();
@@ -95,8 +95,8 @@ void BuildVoiceStudioSection(SectionBuilder &builder, AyuSectionBuilder &ayu) {
 const auto kMeta = BuildHelper({
 	.id = AyuVoiceStudio::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Voice Studio & Modulator")); },
-	.icon = &st::menuIconMicrophone,
+	.title = u"Voice Studio & Modulator"_q,
+	.icon = &st::menuIconSoundSelect,
 }, [](SectionBuilder &builder) {
 	auto ayu = AyuSectionBuilder(builder);
 	builder.addSkip();

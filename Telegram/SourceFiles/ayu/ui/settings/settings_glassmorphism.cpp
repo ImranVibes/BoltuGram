@@ -53,12 +53,12 @@ void BuildGlassmorphismSection(SectionBuilder &builder, AyuSectionBuilder &ayu) 
 				static_cast<AyuFeatures::BackdropMaterial>(i));
 			Ui::Toast::Show(QString("Backdrop material updated"));
 		},
-		.icon = { &st::menuIconThemes },
+		.icon = { &st::menuIconPalette },
 	});
 
 	builder.addSkip();
 
-	ayu.addSettingToggle({
+	ayu.addToggle({
 		.id = u"ayu/glassAnimatedAccents"_q,
 		.title = rpl::single(QString("Glowing Animated Accent Borders")),
 		.getter = [=] { return AyuFeatures::GlassEngine::Instance().animatedAccents(); },
@@ -74,8 +74,8 @@ void BuildGlassmorphismSection(SectionBuilder &builder, AyuSectionBuilder &ayu) 
 const auto kMeta = BuildHelper({
 	.id = AyuGlassmorphism::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Mica & Glassmorphism")); },
-	.icon = &st::menuIconThemes,
+	.title = u"Mica & Glassmorphism"_q,
+	.icon = &st::menuIconPalette,
 }, [](SectionBuilder &builder) {
 	auto ayu = AyuSectionBuilder(builder);
 	builder.addSkip();

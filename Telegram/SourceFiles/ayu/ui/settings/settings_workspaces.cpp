@@ -59,7 +59,7 @@ void BuildWorkspacesList(SectionBuilder &builder) {
 const auto kMeta = BuildHelper({
 	.id = AyuWorkspaces::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Workspaces & Profiles")); },
+	.title = u"Workspaces & Profiles"_q,
 	.icon = &st::menuIconAddToFolder,
 }, [](SectionBuilder &builder) {
 	builder.addSkip();

@@ -81,7 +81,7 @@ void BuildScratchpadSection(SectionBuilder &builder) {
 const auto kMeta = BuildHelper({
 	.id = AyuScratchpad::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Scratchpad & Templates")); },
+	.title = u"Scratchpad & Templates"_q,
 	.icon = &st::menuIconEdit,
 }, [](SectionBuilder &builder) {
 	builder.addSkip();

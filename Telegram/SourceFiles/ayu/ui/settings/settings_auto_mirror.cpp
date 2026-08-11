@@ -65,7 +65,7 @@ void BuildAutoMirrorList(SectionBuilder &builder) {
 const auto kMeta = BuildHelper({
 	.id = AyuAutoMirror::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Channel Auto-Mirror")); },
+	.title = u"Channel Auto-Mirror"_q,
 	.icon = &st::menuIconChannel,
 }, [](SectionBuilder &builder) {
 	builder.addSkip();

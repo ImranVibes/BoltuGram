@@ -78,7 +78,7 @@ void BuildAnalyticsSummary(SectionBuilder &builder) {
 const auto kMeta = BuildHelper({
 	.id = AyuAnalytics::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Chat Analytics & Stats")); },
+	.title = u"Chat Analytics & Stats"_q,
 	.icon = &st::menuIconShowInChat,
 }, [](SectionBuilder &builder) {
 	builder.addSkip();

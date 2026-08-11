@@ -43,7 +43,7 @@ void BuildCrmList(SectionBuilder &builder) {
 		builder.addDividerText(rpl::single(QString("No private tags or notes yet.\nRight-click on any user or group and select 'Tag & Private Note' to add one.")));
 	} else {
 		for (const auto &info : entries) {
-			const auto peer = session->data().peerLoaded(info.peerId);
+			const auto peer = session->data().peerLoaded(PeerId(info.peerId));
 			const auto title = peer ? peer->name() : QString("User #%1").arg(info.peerId);
 			const auto subtitle = info.tag.isEmpty() ? info.note : QString("[%1] %2").arg(info.tag, info.note);
 
@@ -67,7 +67,7 @@ void BuildCrmList(SectionBuilder &builder) {
 const auto kMeta = BuildHelper({
 	.id = AyuCrm::Id(),
 	.parentId = AyuMain::Id(),
-	.title = [] { return rpl::single(QString("Contact CRM & Notes")); },
+	.title = u"Contact CRM & Notes"_q,
 	.icon = &st::menuIconAddToFolder,
 }, [](SectionBuilder &builder) {
 	builder.addSkip();

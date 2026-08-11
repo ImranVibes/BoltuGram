@@ -35,7 +35,7 @@ EditUserCrmBox::EditUserCrmBox(QWidget *, not_null<PeerData*> peer)
 void EditUserCrmBox::prepare() {
 	setTitle(rpl::single(QString("Private Note & Tag")));
 
-	const auto existing = AyuData::UserCrm::Instance().get(_peer->id.bare);
+	const auto existing = AyuData::UserCrm::Instance().get(_peer->id.value);
 	const auto initialTag = existing ? existing->tag : QString();
 	const auto initialNote = existing ? existing->note : QString();
 	if (existing && !existing->colorHex.isEmpty()) {
@@ -86,9 +86,9 @@ void EditUserCrmBox::save() {
 	const auto note = _noteInput ? _noteInput->getLastText().trimmed() : QString();
 
 	if (tag.isEmpty() && note.isEmpty()) {
-		AyuData::UserCrm::Instance().remove(_peer->id.bare);
+		AyuData::UserCrm::Instance().remove(_peer->id.value);
 	} else {
-		AyuData::UserCrm::Instance().set(_peer->id.bare, tag, _selectedColorHex, note);
+		AyuData::UserCrm::Instance().set(_peer->id.value, tag, _selectedColorHex, note);
 	}
 
 	Ui::Toast::Show(QString("Tag & Note saved successfully"));
@@ -96,7 +96,7 @@ void EditUserCrmBox::save() {
 }
 
 void EditUserCrmBox::remove() {
-	AyuData::UserCrm::Instance().remove(_peer->id.bare);
+	AyuData::UserCrm::Instance().remove(_peer->id.value);
 	Ui::Toast::Show(QString("Tag & Note removed"));
 	closeBox();
 }

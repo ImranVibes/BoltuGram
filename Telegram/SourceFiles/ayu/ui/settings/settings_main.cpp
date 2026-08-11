@@ -150,12 +150,12 @@ void BuildCategories(SectionBuilder &builder) {
 	builder.addSectionButton({
 		.title = rpl::single(QString("Voice Studio & Modulator")),
 		.targetSection = AyuVoiceStudio::Id(),
-		.icon = { &st::menuIconMicrophone },
+		.icon = { &st::menuIconSoundSelect },
 	});
 	builder.addSectionButton({
 		.title = rpl::single(QString("Workspaces & Profiles")),
 		.targetSection = AyuWorkspaces::Id(),
-		.icon = { &st::menuIconFolders },
+		.icon = { &st::menuIconAddToFolder },
 	});
 	builder.addSectionButton({
 		.title = rpl::single(QString("Channel Auto-Mirror")),
@@ -170,7 +170,7 @@ void BuildCategories(SectionBuilder &builder) {
 	builder.addSectionButton({
 		.title = rpl::single(QString("Mica & Glassmorphism")),
 		.targetSection = AyuGlassmorphism::Id(),
-		.icon = { &st::menuIconThemes },
+		.icon = { &st::menuIconPalette },
 	});
 	builder.addSectionButton({
 		.title = tr::ayu_CategoryOther(),
@@ -243,7 +243,6 @@ const auto kMeta = BuildHelper({
 	builder.addSkip();
 	BuildVersionInfo(builder);
 	BuildCategories(builder);
-	BuildLinks(builder);
 });
 
 } // namespace
